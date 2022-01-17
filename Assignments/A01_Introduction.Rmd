@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Introduction"
-author: "Student Name"
+author: Natalie von Turkovich
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -26,20 +26,32 @@ Target due date: 2022-01-18
 
 1. Post the link to your forked GitHub repository below. Your repo should include one or more commits and an edited README file.  
 
->  Link:
+>  Link:https://github.com/nvonturkovich/Water_Data_Analytics_2022.git
 
 ## Data Visualization Exercises
 
 2. Set up your work session. Check your working directory, load packages `tidyverse`,  `dataRetrieval`, and `zoo`. Set your ggplot theme as theme_classic (you may need to look up how to set your theme).
 
 ```{r, message = FALSE}
+getwd()
+```
+
+```{r, message = FALSE}
+library(tidyverse)
+library(dataRetrieval)
+library(zoo)
 
 ```
 
 3. Upload discharge data for the Eno River at site 02096500 for the same dates as we studied in class (2012-01-01 through 2021-12-31). Obtain data for discharge. Rename the columns with informative titles, as we did in class. 
 
 ```{r}
-
+#  data import
+EnoDischarge <- readNWISdv(siteNumbers = "02096500", parameterCd = "00060", # discharge (ft3/s)
+                     startDate = "2012-01-01",
+                     endDate = "2021-12-31")
+# column rename
+names(EnoDischarge)[4:5] <- c("Discharge_cfs", "Approval_Code")
 ```
 
 
@@ -54,19 +66,60 @@ Target due date: 2022-01-18
 * Add a legend. (hint: Google "add legend two geom layers ggplot")
 
 ```{r}  
-
-
+EnoDischarge<-EnoDischarge %>% 
+  mutate(Discharge_m3 = Discharge_cfs/35.3147,
+         Discharge_RollMean = rollmean(Discharge_m3, 30, fill=NA))
+EnoDischarge
 ```
+
+```{r}  
+#discharge m3+rolling mean
+EnoPlot2 <-
+  ggplot(EnoDischarge, aes(x=Date))+
+  geom_line(aes( y = Discharge_m3, color = "Daily")) +
+  geom_line(aes(y=Discharge_RollMean, color = "30-day")) + 
+  scale_color_manual(values = c("Daily" = "lightblue", "30-day" = "darkblue")) + 
+  scale_y_log10(name = expression("Discharge (m"^3*"/s)")) +
+  theme_classic() +
+  theme(axis.title.x = element_blank(), legend.title = element_blank(), legend.position = "top")
+EnoPlot2
+```
+
+```{r}
+#just discharge m3
+EnoPlot3 <-
+  ggplot(EnoDischarge, aes(x=Date))+
+  geom_line(aes( y = Discharge_m3, color = "Daily")) +
+  scale_color_manual(values = c("Daily" = "lightblue", "30-day" = "darkblue")) + 
+  scale_y_log10(name = expression("Discharge (m"^3*"/s)")) +
+  theme_classic() +
+  theme(axis.title.x = element_blank(), legend.title = element_blank(), legend.position = "top")
+EnoPlot3
+```
+
+```{r}
+#just rolling  mean
+EnoPlot4 <-
+  ggplot(EnoDischarge, aes(x=Date))+
+  geom_line(aes(y=Discharge_RollMean, color = "30-day")) + 
+  scale_color_manual(values = c("Daily" = "lightblue", "30-day" = "darkblue")) + 
+  scale_y_log10(name = expression("Discharge (m"^3*"/s)")) +
+  theme_classic() +
+  theme(axis.title.x = element_blank(), legend.title = element_blank(), legend.position = "top")
+EnoPlot4
+```
+
+
 
 5. In what ways was the second plot a more effective visualization than the first? 
 
-> ANSWER: 
+> ANSWER: The second plot is a more effective visualization than the first due to having both the (daily?) discharge as well as the rolling mean. Seeing these two lines plotted on the same graph gives a better picture of the discharge. Represnting these two lines in different colors, and adding a legend makes the plot more comprehensible. 
 
 6. What portions of the coding were challenging for you?
 
-> ANSWER: 
+> ANSWER: I have a hard time remember the coding, I have to look up how to do most things. Some bits are definitely startinf to stick though!
 
 7. Interpret the graph you made. What are the things you notice about within- and across-year variability, as well as the differences between daily values and 30-day rolling mean?
 
-> ANSWER: 
+> ANSWER: It is interesting to notice how the both the daily and rolling mean discharge volumes are increasing over time. There is a general increasing trend. There is though a lot of variation, with a ~3 year period. Lots of loss and gain over a shorter period of time. 
 
