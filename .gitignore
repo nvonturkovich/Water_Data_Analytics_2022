@@ -28,3 +28,5 @@ vignettes/*.pdf
 .Renviron
 Water_Data_Analytics_2022.Rproj
 .DS_Store
+.nb.html
+R_Notes.nb.html
