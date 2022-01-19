@@ -1,0 +1,49 @@
+---
+title: "R Notes"
+output: html_notebook
+---
+
+
+git remote add upstream _____ # this adds your upstream folder
+git remote -v #this checked where you are linked
+git pull upstream main #this pulls updated docs from upstream folder
+
+
+## Example Session Set Up
+```{r, message = FALSE}
+# Check working directory (should be project file location)
+getwd()
+
+install.packages("tidyverse")
+install.packages("lubridate")
+install.packages("rLakeAnalyzer")
+
+# load packages
+library(tidyverse)
+library(lubridate)
+library(rLakeAnalyzer)
+
+# Load data
+NTLdata <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+
+# set ggplot theme
+theme_set(theme_classic())
+```
+
+Conflicts Loading Packages-
+shows which packages functions win over another for functions of the same name
+
+Tidyverse loads 8 different packages
+
+Irradience - light in water
+IrradienceDeck - light in air above water
+
+Reading in csv Files:
+read.csv = 
+read_csv = is faster more efficient - from dplyr
+both do the same thing
+here package - is another way to pull in data
+
+When to use $:
+use data$column - in base R in a matrix
+when using dplyr - piping and you started with the data set then piped down to what column
