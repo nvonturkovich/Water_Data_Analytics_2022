@@ -230,7 +230,7 @@ Let's take the Bitterroot River, which displays a clear seasonal cycle. Let's de
 ```{r}  
 BitterrootDischarge.Historical <- readNWISdv(siteNumbers = "12344000",
                      parameterCd = "00060", # discharge (ft3/s)
-                     startDate = "")
+                     startDate = "") #blank will grade all the record available
 
 names(BitterrootDischarge.Historical)[4:5] <- c("Discharge", "Approval.Code")
 
@@ -239,17 +239,36 @@ BitterrootDischarge.Historical <- mutate(BitterrootDischarge.Historical,
 
 BitterrootDischarge.Pattern <- BitterrootDischarge.Historical %>%
   group_by(DOY) %>%
-  summarise(Median.Discharge = median(Discharge), 
-            p95.Discharge = quantile(Discharge, 0.95, na.rm = TRUE),
+  summarise(Median.Discharge = median(Discharge, na.rm = TRUE), 
+            p95.Discharge = quantile(Discharge, 0.95, na.rm = TRUE), #quantile function- can specify anything between 0-1. need to remove NAs
             p5.Discharge = quantile(Discharge, 0.05, na.rm = TRUE))
 
 ggplot(BitterrootDischarge.Pattern, aes(x = DOY)) +
-  geom_line(aes(y = Median.Discharge)) +
+  geom_line(aes(y = Median.Discharge)) + #each as an indivdual geom line with a different color
   geom_line(aes(y = p95.Discharge), color = "gray") +
   geom_line(aes(y = p5.Discharge), color = "gray") +  
   labs(x = "Day of Year", y = expression("Discharge (ft"^3*"/s)")) 
 ```
 
 
+showing seasonality by using day of year as opposed to month?
+day of year works well 
+
 ## Closing Discussion
 What are your impressions of seasonal and interannual discharge for our example rivers? How might you go about interpreting discharge data for any given river?
+
+
+Just Bitterroot graph
+```{r}
+BitterrootPlot <- 
+  ggplot(CombinedDischarge, aes(x = Date, y = Bitterroot.Discharge)) +
+  geom_line() +
+  labs(x = "", y = expression("Discharge (ft"^3*"/s)"), title = "Bitterroot River") + 
+  theme(plot.title = element_text(margin = margin(b = -10), size = 12), axis.title.x = element_blank())
+BitterrootPlot
+```
+
+nehalem
+western cascades. winter peaks, effected by developement
+
+
