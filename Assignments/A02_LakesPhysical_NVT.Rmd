@@ -61,7 +61,7 @@ ggplot(filter(NTL.data, year4 == 1993), #subset = filter
   scale_color_viridis_c() +
   labs(x = expression("Temperature "(degree*C)), y = "Depth (m)", color = "DOY")
 
-ggplot(subset(NTLdata, year4 == 1993),
+ggplot(subset(NTL.data, year4 == 1993),
        aes(x = dissolvedOxygen, y = depth, color = daynum)) +
   geom_point(alpha = 0.5) +
   scale_y_reverse() +
@@ -97,8 +97,15 @@ NTL.data_thermo <- NTL.data %>%
 
 ```{r}
 ggplot(NTL.data_thermo, aes(x = daynum, y = thermocline, color = lakename)) +
-  geom_point() +
+  geom_point(alpha = .5) +
   labs( x= "DOY", y = "Thermocline depth (m)", color = "Lake") +
   scale_color_brewer()
 ```
 
+```{r}
+ggplot(NTL.data_thermo, aes(x = lakename, y = thermocline, fill = as.factor(Month))) +
+  geom_boxplot()+
+  labs( x= "Lake", y = "Thermocline depth (m)", fill = "Month") +
+  scale_color_brewer()+
+  theme(legend.position = "top")
+```
