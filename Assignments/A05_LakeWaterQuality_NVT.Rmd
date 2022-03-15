@@ -33,7 +33,7 @@ getwd()
 library(tidyverse)
 library(lubridate)
 library(LAGOSNE)
-library(dbplyr)
+library(dplyr)
 
 theme_set(theme_classic())
 options(scipen = 4) #sets the number of decimal places that appear in output
