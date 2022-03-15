@@ -62,14 +62,21 @@ MysterySiteDischarge<-mutate(MysterySiteDischarge,
 
 MysterySiteDischarge$WaterYear <- as.numeric(as.character(MysterySiteDischarge$WaterYear))
 
-MysterySiteDischarge.Pattern
+MysterySiteDischarge.Pattern<-MysterySiteDischarge %>% 
+  group_by(DayOfYear) %>% 
+  summarise(Median_Discharge = median(Discharge),
+            Q75_Discharge = quantile(Discharge, probs = 0.75),
+            Q25_Discharge = quantile(Discharge, probs = 0.25))
   
-  MysterySiteDischarge %>% 
-  
-
+ggplot(MysterySiteDischarge.Pattern, aes(x=DayOfYear))+
+  geom_line(aes(y=Median_Discharge))+
+  geom_line(aes(y=Q75_Discharge), color = "gray")+
+  geom_line(aes(y=Q25_Discharge), color = "gray")+
+  labs(x="Day of Year", y="Discharge (cfs)") 
 ```
 
 7. What seasonal patterns do you see? What does this tell you about precipitation patterns and climate in the watershed?
+The lowest flows are over the summer months and the highest flows occur in the winter. We don’t see a strong snowmelt pulse in the spring, so the climate is likely warm enough that snow is uncommon. This watershed likely experiences higher precipitation in the winter than in the summer.
 
 > 
 
@@ -82,12 +89,46 @@ MysterySiteDischarge.Pattern
 10. Create a model to predict the discharge for a 100-year flood for both sets of recurrence intervals. 
 
 ```{r}
+#8
+#(first 30 years of record)
+MysterySite.Annual.30yr<-MysterySiteDischarge %>% 
+  filter(WaterYear<1996) %>% 
+  group_by(WaterYear) %>% 
+  summarise(PeakDischarge = max(Discharge)) %>% 
+  mutate(Rank = rank(-PeakDischarge),
+         RecurranceInterval = (length(WaterYear)+1)/Rank,
+         Probabilty = 1/RecurranceInterval)
 
+
+#(all years of record)
+MysterySite.Annual.Full<-MysterySiteDischarge %>% 
+  group_by(WaterYear) %>% 
+  summarise(PeakDischarge = max(Discharge)) %>% 
+  mutate(Rank = rank(-PeakDischarge),
+         RecurranceInterval = (length(WaterYear)+1)/Rank,
+         Probabilty = 1/RecurranceInterval)
+#9
+ggplot(MysterySite.Annual.30yr, aes(x= RecurranceInterval, y=PeakDischarge))+
+  geom_point()+
+  geom_point(data=MysterySite.Annual.Full, color = "red",
+             aes(x=RecurranceInterval, y=PeakDischarge))+
+  scale_x_log10()
+
+#10
+RI_model_30yr<-lm(data = MysterySite.Annual.30yr, PeakDischarge ~log(RecurranceInterval))
+summary(RI_model_30yr)
+
+RI_model_full<-lm(data = MysterySite.Annual.Full, PeakDischarge ~log(RecurranceInterval))
+summary(RI_model_full)
+
+RI_model_30yr$coefficients[1] + RI_model_30yr$coefficients[2]*log10(100)
+
+RI_model_full$coefficients[1] + RI_model_full$coefficients[2]*log10(100)
 
 ```
 
 11. How did the recurrence interval plots and predictions of a 100-year flood differ among the two data frames? What does this tell you about the stationarity of discharge in this river?
 
-> 
+> 30yr recurrance resulting in greater rise in discharge for east unit increase in recurrance interval than the full calcualtion. 100 year flood predicted higher discharge from the 30 yr record than from the 100 year record. 
 
 
