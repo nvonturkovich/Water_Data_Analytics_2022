@@ -53,13 +53,11 @@ LAGOStrophic <- LAGOStrophic %>%
   mutate(trophic.class.secchi = case_when(TSI.secchi < 40 ~ "Oligotrophic",
                                           TSI.secchi >= 40 & TSI.secchi < 50 ~ "Mesotrophic",
                                           TSI.secchi >= 50 & TSI.secchi< 70 ~ "Eutrophic",
-                                          TSI.secchi >= 70 ~ "Hypereutrophic"))+
+                                          TSI.secchi >= 70 ~ "Hypereutrophic")) %>% 
   mutate(trophic.class.tp = case_when(TSI.tp < 40 ~ "Oligotrophic",
                                       TSI.tp >= 40 & TSI.tp < 50 ~ "Mesotrophic",
                                       TSI.tp >= 50 & TSI.tp< 70 ~ "Eutrophic",
                                       TSI.tp >= 70 ~ "Hypereutrophic"))
-
-#Error in eval_tidy(pair$lhs, env = default_env) : object 'TSI.tp' not found
 
 ```
 
@@ -102,7 +100,7 @@ LAGOStrophic %>%
 
 Which of these metrics is most conservative in its designation of eutrophic conditions? Why might this be?
 
-> 
+> trophic.class.secchi is resulted in the highest porportion of eutrophic conditions. trophic.class.tp was the most conservative, this may be becuase with the secchi disk and cl these are both kind of proxies for true eutrophication and other factors may be influencing these results. 
 
 
 ## Nutrient Concentrations
@@ -114,6 +112,21 @@ LAGOSstate <- LAGOSdata$state
 LAGOSnutrient <- LAGOSdata$epi_nutr
 LAGOSlocus <- LAGOSdata$locus
 
+LAGOStrophic$sampledate<-ymd(LAGOStrophic$sampledate)
+
+LAGOSNandP<-LAGOStrophic %>% 
+  left_join(., LAGOSlocus) %>%
+  left_join(., LAGOSnutrient) %>%
+  left_join(., LAGOSstate) %>%
+  select(lagoslakeid, sampledate, tn, tp, state, state_name) %>%
+  mutate(sampleyear = year(sampledate),
+         samplemonth = month(sampledate)) %>%
+  filter(samplemonth %in% c(5:9))
+```
+
+
+```{r}
+#tired this way didnt work
 LAGOSNandP<-LAGOStrophic %>% 
   filter(c(lagoslakeid, sampledate, tn, tp, state, state_name)) %>%
   left_join(., LAGOSlocus) %>%

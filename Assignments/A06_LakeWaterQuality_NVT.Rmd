@@ -147,7 +147,9 @@ ggplot(NCdata_processed, aes(x = TP_mgL, y = Chla_ugL)) +
 
 6. How might you expect this stressor-response relationship to change (or not) across the Mountains, Piedmont, and Coastal Plain regions of the state? How might you anticipate natural lakes might behave differently than reservoirs?
 
-Is the location region is warmer the stressor response relationship could be magnified?
-Natural Lake can handle these stressors better than reservoirs as reservoirs lack the dynamic relationships of a lake?
+Stressor-response relationships change across regions for many reasons such as if the location  of the region is warmer the stressor response relationship could be magnified, or if the area has higher agriculture like in the piedmont as opposed to the mountains. 
+Reservoirs are often dammed rivers. Fast moving water carrying sediment and nutrients slows as it enters the collection area of the reservoir. Sediment drops allowing more light to penetrate the water promoting growth of plankton. Dynamics such as these differ from a natural lake system.
 
+TP - nutrient
+Chloropyll - proxy for growth of plankton
 > 

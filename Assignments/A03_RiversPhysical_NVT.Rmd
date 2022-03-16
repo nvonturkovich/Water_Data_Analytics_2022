@@ -115,20 +115,22 @@ ggplot(MysterySite.Annual.30yr, aes(x= RecurranceInterval, y=PeakDischarge))+
   scale_x_log10()
 
 #10
-RI_model_30yr<-lm(data = MysterySite.Annual.30yr, PeakDischarge ~log(RecurranceInterval))
+RI_model_30yr<-lm(data = MysterySite.Annual.30yr, PeakDischarge ~log10(RecurranceInterval))
 summary(RI_model_30yr)
 
-RI_model_full<-lm(data = MysterySite.Annual.Full, PeakDischarge ~log(RecurranceInterval))
+RI_model_full<-lm(data = MysterySite.Annual.Full, PeakDischarge ~log10(RecurranceInterval))
 summary(RI_model_full)
 
-RI_model_30yr$coefficients[1] + RI_model_30yr$coefficients[2]*log10(100)
+RI_model_30yr$coefficients[1] + RI_model_30yr$coefficients[2]*log10(100) #mulitply by log10 becuase we logged in the model above
 
 RI_model_full$coefficients[1] + RI_model_full$coefficients[2]*log10(100)
-
+#y=b+mx
 ```
 
 11. How did the recurrence interval plots and predictions of a 100-year flood differ among the two data frames? What does this tell you about the stationarity of discharge in this river?
 
 > 30yr recurrance resulting in greater rise in discharge for east unit increase in recurrance interval than the full calcualtion. 100 year flood predicted higher discharge from the 30 yr record than from the 100 year record. 
+A unit increase in recurrance interval results in a 2435.40 cfs discharge increase for the full year recurrace interval data. A 100 year flood event will result in a 4835.488 cfs flood for the full year recurrance interval data.
+
 
 

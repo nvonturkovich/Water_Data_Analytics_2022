@@ -32,12 +32,13 @@ Target due date: 2022-02-15
 ```{r}
 #1
 getwd()
+library(EcoHydRology)
 library(tidyverse)
 library(cowplot)
 library(dataRetrieval)
 library(lubridate)
 library(lfstat)
-library(EcoHydRology)
+
 
 theme_set(theme_classic())
 options(scipen = 4) #sets the number of decimal places that appear in output
@@ -59,7 +60,7 @@ names(Nehalem_Discharge)[4:5] <- c("Discharge", "Approval.Code")
 Bitterroot_Discharge <- Bitterroot_Discharge %>%
   mutate(WaterYear = water_year(Date),
          Baseflow_lfstat = baseflow(Discharge), 
-         Stormflow_lfstat = Discharge - Baseflow_lfstat) #STRUGGLING HERE
+         Stormflow_lfstat = Discharge - Baseflow_lfstat) 
 Bitterroot_Discharge$WaterYear <- as.numeric(as.character(Bitterroot_Discharge$WaterYear))
 
 Nehalem_Discharge <- Nehalem_Discharge %>%
@@ -139,4 +140,4 @@ plot_grid(Nehalem_discharge_BF_annual, Nehalem_prop, align = "hv", ncol = 1)
 
 7. How do these rivers differ in their discharge and baseflow, both within and across years? How would you attribute these patterns to the climatic conditions in these locations?
 
-> 
+> Bitterroot's discharge and baseflow are very similar over the years. It's baseflow is consistently a large portion of the total discharge over the years. Nehalem's baseflow is a smaller portportion of the total discharge, and is more varied over the years. 
