@@ -1,6 +1,6 @@
 ---
 title: "Assignment 9: Mapping"
-author: "Student Name"
+author: "Natalie von Turkovich"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -28,6 +28,16 @@ Target due date: 2022-04-12
 
 
 ```{r setup}
+library(tidyverse)
+library(dataRetrieval)
+library(maps)
+library(sf)
+#install.packages("nhdplusTools")
+library(nhdplusTools)
+library(LAGOSNE)
+
+theme_set(theme_classic())
+options(scipen = 5)
 
 ```
 
@@ -39,8 +49,46 @@ Target due date: 2022-04-12
 * A boxplot with jittered points layered on top of chlorophyll concentrations in each lake (chlorophyll on y axis, lake on x axis), with each lake having a fill and/or color that matches the map. 
 
 ```{r}
+LAGOSdata <- lagosne_load()
 
+states <- st_as_sf(map(database = "state", plot = FALSE, fill = TRUE, col = "white"))
 
+states.subset <- filter(states, ID== "vermont")
+
+LAGOSlocus <- LAGOSdata$locus
+LAGOSstate <- LAGOSdata$state
+LAGOSnutrient <- LAGOSdata$epi_nutr
+LAGOScombined <-
+  left_join(LAGOSnutrient, LAGOSlocus) %>%
+  left_join(., LAGOSstate) %>%
+  filter(state == "VT") %>%
+  select(lagoslakeid, gnis_name, sampledate, chla, nhd_lat, nhd_long) %>%
+  drop_na(chla) %>%
+  arrange(lagoslakeid)
+
+lakesample <- sample(x = LAGOScombined$lagoslakeid, size = 5) #random sample of 5 lakes
+
+LAGOSsample <- LAGOScombined %>%
+  filter(lagoslakeid %in% lakesample)
+
+LAGOSsample.spatial <- st_as_sf(LAGOSsample, coords = c("nhd_long", "nhd_lat"), crs = 4326)
+      
+#map                          
+ggplot() +
+  geom_sf(data = states.subset, fill = "white") +
+  geom_sf(data = LAGOSsample.spatial, aes(color = as.factor(lagoslakeid))) +
+  scale_color_viridis_d() +
+  labs(color = "Lake ID") +
+  theme(legend.position = "top")
+
+#scatter box
+ggplot(LAGOSsample, aes(x = as.factor(lagoslakeid), y = chla, fill = as.factor(lagoslakeid)))+
+  geom_boxplot(outlier.shape = NA, alpha = 0.5) +
+  geom_jitter(alpha = 0.5) +
+  scale_y_log10() +
+  scale_fill_viridis_d() +
+  labs(x = "Lake ID", y = expression("Chlorophyll a ("*mu*"g/L)"), fill = "") +
+  theme(legend.position = "none")
 ```
 
 
@@ -50,13 +98,54 @@ Target due date: 2022-04-12
 
 
 ```{r}
+# Recall there are a lot of parameters measured at the site
+EnoParams <- whatNWISdata(siteNumbers = "02085070")
+
+# Extract latitude and longitude for the site
+EnoCoords <- EnoParams %>%
+  select(site_no, dec_lat_va, dec_long_va) %>%
+  distinct()
+
+# Define the gage site as the starting point
+start_point <- st_sfc(st_point(c(EnoCoords$dec_long_va, EnoCoords$dec_lat_va)), crs = 4269) # NAD83, commonly used by US agencies
+
+start_comid <- discover_nhdplus_id(start_point)
+# start_point2 <- st_as_sf(data.frame(x = NeuseCoords$dec_long_va, y = NeuseCoords$dec_lat_va),
+# coords = c("x", "y"), crs = 4269)
+
+# Navigate the NLDI network
+NLDI <- navigate_nldi(list(featureSource = "comid", featureID = start_comid),
+                          mode = "upstreamTributaries",
+                          distance_km = 1000) # Extract watershed and flowpath information
+
+# Extract watershed and flowpath information
+subset_file <- tempfile(fileext = ".gpkg")
+subset <- subset_nhdplus(comids = as.integer(NLDI$UT$nhdplus_comid),
+                         output_file = subset_file,
+                         nhdplus_data = "download",
+                         flowline_only = FALSE,
+                         return_data = TRUE, overwrite = TRUE)
+
+#Warning message:No nhdarea features found  - this is OK
 
 
+# Create data frames
+flowline <- subset$NHDFlowline_Network
+catchment <- subset$CatchmentSP
+plot_nhdplus("USGS-02085070")
+
+max(flowline$totdasqkm)
+
+summary(as.factor(flowline$streamorde))
+
+gages <- get_nwis(AOI = catchment)
+
+gages <- st_intersection(gages, catchment)
 ```
 
 4. What is the upstream drainage area for this gage, and how are the flowpaths distributed with regard to stream order?
 
-> 
+> The upstream drainage area is 367.68 square kilometers. There are 123 flowpaths of stream order 1, 45 of stream order 2, 19 of stream order 3, and 28 of stream order 4.
 
 5. Are there any other gage sites in the upstream catchment? If so, where are they?
-> 
+> Yes there are two other gages, one is located in Hillsborough and on Cole Mill Road.
